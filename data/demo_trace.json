@@ -1,0 +1,67 @@
+{
+  "model_id": "deformable_detr_v2",
+  "device": "qualcomm_soc_x",
+  "total_latency_ms": 284.3,
+  "nodes": [
+    {
+      "id": "unfold_0",
+      "op_type": "Unfold",
+      "latency_ms": 42.1,
+      "latency_rank": 1,
+      "threads_used": 1,
+      "threads_available": 8,
+      "input_shapes": [[1, 64, 56, 56]],
+      "output_shapes": [[1, 576, 784]],
+      "neighbors": ["conv_3", "reshape_1"],
+      "flags": ["single_threaded", "high_latency_outlier"]
+    },
+    {
+      "id": "rope_embed_1",
+      "op_type": "RoPE",
+      "latency_ms": 27.9,
+      "latency_rank": 2,
+      "threads_used": 4,
+      "threads_available": 8,
+      "input_shapes": [[1, 8, 256, 64]],
+      "output_shapes": [[1, 8, 256, 64]],
+      "neighbors": ["attn_q_0", "attn_k_0"],
+      "flags": ["memory_bound", "high_latency_outlier"]
+    },
+    {
+      "id": "mha_proj_2",
+      "op_type": "MultiHeadAttention",
+      "latency_ms": 23.4,
+      "latency_rank": 3,
+      "threads_used": 5,
+      "threads_available": 8,
+      "input_shapes": [[1, 256, 512]],
+      "output_shapes": [[1, 256, 512]],
+      "neighbors": ["rope_embed_1", "ffn_0"],
+      "flags": ["memory_bound", "thread_imbalance"]
+    },
+    {
+      "id": "conv_3",
+      "op_type": "Conv2d",
+      "latency_ms": 13.2,
+      "latency_rank": 4,
+      "threads_used": 8,
+      "threads_available": 8,
+      "input_shapes": [[1, 64, 56, 56]],
+      "output_shapes": [[1, 128, 28, 28]],
+      "neighbors": ["unfold_0", "bn_0"],
+      "flags": []
+    },
+    {
+      "id": "ffn_0",
+      "op_type": "Linear",
+      "latency_ms": 11.8,
+      "latency_rank": 5,
+      "threads_used": 8,
+      "threads_available": 8,
+      "input_shapes": [[1, 256, 512]],
+      "output_shapes": [[1, 256, 2048]],
+      "neighbors": ["mha_proj_2", "gelu_0"],
+      "flags": []
+    }
+  ]
+}

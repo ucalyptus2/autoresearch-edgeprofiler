@@ -1,0 +1,12 @@
+[project]
+name = "autoresearch-edgeprofiler"
+version = "0.1.0"
+description = "Closed-loop local profiler copilot for model optimization."
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.6",
+  "PyYAML>=6.0",
+]
+
+[tool.setuptools]
+packages = []

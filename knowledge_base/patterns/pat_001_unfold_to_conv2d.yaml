@@ -1,0 +1,29 @@
+id: pat_001
+name: unfold_to_conv2d
+trigger:
+  op_type: Unfold
+  symptoms:
+    - single_threaded
+    - high_latency_outlier
+  devices:
+    - qualcomm_*
+root_cause: >
+  Unfold frequently maps to a gather-like implementation on some NPUs, which can
+  become effectively single-threaded and dominate end-to-end latency.
+fix:
+  description: Replace torch.unfold with grouped conv2d using an equivalent extraction kernel.
+  code_template: |
+    # Before:
+    x = x.unfold(-1, kernel_size, stride).unfold(-2, kernel_size, stride)
+    # After:
+    weight = torch.eye(kernel_size ** 2).reshape(kernel_size ** 2, 1, kernel_size, kernel_size)
+    x = F.conv2d(x, weight.expand(-1, C, -1, -1), stride=stride, groups=C)
+validation:
+  expected_latency_reduction_pct: 70
+  expected_threads: 8
+provenance:
+  author: pattern_author_001
+  date: 2026-04-08
+  validated_on:
+    - qualcomm_soc_x
+  success_count: 3

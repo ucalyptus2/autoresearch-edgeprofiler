@@ -1,0 +1,25 @@
+id: pat_003
+name: mha_split_head
+trigger:
+  op_type: MultiHeadAttention
+  symptoms:
+    - memory_bound
+    - thread_imbalance
+  devices:
+    - qualcomm_*
+    - renesas_*
+root_cause: >
+  Large fused head projections can exceed the sweet spot for vector width and cache locality.
+fix:
+  description: Split the attention head projection into smaller chunks aligned to device vector width.
+  code_template: |
+    q, k, v = split_projection_chunks(x, chunk_size=64)
+    out = attention_kernel(q, k, v)
+validation:
+  expected_latency_reduction_pct: 22
+  expected_threads: 8
+provenance:
+  author: pattern_author_003
+  date: 2026-04-08
+  validated_on:
+    - qualcomm_soc_x

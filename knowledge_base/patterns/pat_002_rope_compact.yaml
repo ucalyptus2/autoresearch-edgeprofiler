@@ -1,0 +1,25 @@
+id: pat_002
+name: rope_compact
+trigger:
+  op_type: RoPE
+  symptoms:
+    - memory_bound
+    - high_latency_outlier
+  devices:
+    - qualcomm_*
+    - tenstorrent_*
+root_cause: >
+  Recomputing rotary embeddings per token can inflate memory traffic and hurt cache behavior.
+fix:
+  description: Precompute compact rotary terms and fuse the apply step into the attention path.
+  code_template: |
+    rope_cache = precompute_rope_cache(seq_len=max_seq, head_dim=head_dim, device=x.device)
+    x = apply_rope_fused(x, rope_cache)
+validation:
+  expected_latency_reduction_pct: 28
+  expected_threads: 8
+provenance:
+  author: pattern_author_002
+  date: 2026-04-08
+  validated_on:
+    - qualcomm_soc_x

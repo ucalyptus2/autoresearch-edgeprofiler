@@ -1,0 +1,7 @@
+model_id: deformable_detr_v2
+device: qualcomm_soc_x
+trace_path: data/demo_trace.json
+target_improvement_pct: 20
+max_cycles: 5
+top_k: 3
+max_attempts_per_node: 2

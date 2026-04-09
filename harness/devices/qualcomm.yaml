@@ -1,0 +1,4 @@
+name: qualcomm_soc_x
+threads_available: 8
+notes:
+  - Some gather-style ops collapse to single-thread execution.
